@@ -1,6 +1,6 @@
 from flask_appbuilder.security.sqla.manager import SecurityManager
 from flask_appbuilder import SQLA, AppBuilder
-from api.auth.security import LDAPSecurityManager
+from app.auth.security import LDAPSecurityManager
 
 auth_manager: SecurityManager | None = None
 

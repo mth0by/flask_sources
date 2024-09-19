@@ -49,8 +49,6 @@ assoc_user_role = Table(
 
 
 class User(Model, BaseUser):
-    """Represents an Airflow user which has roles assigned to it."""
-
     __tablename__ = "ab_user"
     id = Column(Integer, primary_key=True)
     first_name = Column(String(256), nullable=False)
