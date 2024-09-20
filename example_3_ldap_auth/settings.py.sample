@@ -1,19 +1,29 @@
+from pathlib import Path
+
 """
 It’s set to 'dev' to provide a convenient value during development,
 but it should be overridden with a random value when deploying.
 """
 SECRET_KEY = "dev"
 
-
-#region Auth
+BASEDIR = Path(__file__).absolute()
+SQLALCHEMY_DATABASE_URI = 'sqlite:///app.db'
 
 # region Authentication
 # https://flask-appbuilder.readthedocs.io/en/latest/config.html
 from flask_appbuilder.security.manager import AUTH_LDAP
 
 AUTH_TYPE = AUTH_LDAP
-AUTH_LDAP_SERVER = "ldap://ldap.example.org"
+AUTH_LDAP_SERVER = "ldap://example.com"
 AUTH_LDAP_USE_TLS = False
+
+# a mapping from LDAP DN to a list of FAB roles
+# AUTH_ROLES_MAPPING = {
+#     "CN=fab_users,OU=groups,DC=example,dc=org": ["User"],
+#     "CN=fab_admins,OU=groups,DC=example,dc=org": ["Admin"],
+# }
+
+FAB_SECURITY_MANAGER_CLASS='app.auth.LDAPSecurityManager'
 
 # registration configs
 AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB
@@ -23,9 +33,9 @@ AUTH_LDAP_LASTNAME_FIELD = "sn"
 AUTH_LDAP_EMAIL_FIELD = "mail"  # if null in LDAP, email is set to: "{username}@email.notfound"
 
 # search configs
-AUTH_LDAP_SEARCH = "ou=users,dc=example,dc=org"  # the LDAP search base
+AUTH_LDAP_SEARCH = "dc=example,dc=com"  # the LDAP search base
 AUTH_LDAP_UID_FIELD = "uid"  # the username field
-AUTH_LDAP_BIND_USER = "uid=admin,dc=example,dc=org"  # the special bind username for search
-AUTH_LDAP_BIND_PASSWORD = "admin_password"  # the special bind password for search
+AUTH_LDAP_BIND_USER = "uid=admin,dc=example,dc=com"  # the special bind username for search
+AUTH_LDAP_BIND_PASSWORD = "password"  # the special bind password for search
 
 # endregion

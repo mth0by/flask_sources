@@ -4,7 +4,7 @@ import os
 from flask import Flask
 from flask_appbuilder import SQLA, AppBuilder
 
-from app.auth.extentions.init_auth_manager import init_auth_manager
+from app.extentions import init_appbuilder_views
 
 from pathlib import Path
 
@@ -17,10 +17,11 @@ logging.getLogger().setLevel(logging.DEBUG)
 
 app = Flask(__name__)
 app.config.from_pyfile(CONF_FILEPATH)
+
 db = SQLA(app)
+db.init_app(app)
 
-appbuilder = AppBuilder(app, db.session)
+with app.app_context():
+    appbuilder = AppBuilder(app, db.session)
 
-init_auth_manager(appbuilder)
-
-# from . import views
+    init_appbuilder_views(app)
