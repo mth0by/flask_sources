@@ -9,7 +9,9 @@ from flask import (
 )
 
 from flask_login import current_user, login_user, logout_user, login_required
-from app import login_manager, db
+
+from app import login_manager
+from app.database import db_session
 from app.auth.forms import LoginForm
 from app.auth.models import User, UserRoles, Role
 
@@ -47,14 +49,15 @@ def login():
         if not user:
             user = User(username=username, password=password)
         else:
-            db.session.query(UserRoles).filter_by(user_id=user.id).delete()
+            db_session.query(UserRoles).filter_by(user_id=user.id).delete()
 
         user_roles = list(get_user_roles(entry))
-        roles = db.session.query(Role).filter(Role.name.in_(user_roles))
+        roles = db_session.query(Role).filter(Role.name.in_(user_roles))
         user.roles.extend(roles)
-        db.session.add(user)
 
-        db.session.commit()
+        db_session.add(user)
+        db_session.commit()
+
         login_user(user)
         flash('Авторизация успешна.', 'success')
         return redirect(url_for('common.home'))

@@ -2,7 +2,6 @@ import logging
 import os
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 
 from pathlib import Path
@@ -17,8 +16,6 @@ logging.getLogger().setLevel(logging.DEBUG)
 app = Flask(__name__)
 app.config.from_pyfile(CONF_FILEPATH)
 
-db = SQLAlchemy(app)
-
 with app.app_context():
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -30,4 +27,6 @@ with app.app_context():
     app.register_blueprint(auth)
     app.register_blueprint(common)
 
-    db.create_all()
+    from app.database import init_db
+
+    init_db()

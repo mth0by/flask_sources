@@ -1,11 +1,13 @@
-from app import db
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
+from app.database import Base, init_db
 
 
-class User(db.Model):
+class User(Base):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100))
-    roles = db.relationship('Role', secondary='user_roles')
+    id = Column(Integer, primary_key=True)
+    username = Column(String(100))
+    roles = relationship('Role', secondary='user_roles')
 
     def __init__(self, username, password):
         self.username = username
@@ -23,14 +25,14 @@ class User(db.Model):
         return self.id
 
 
-class Role(db.Model):
+class Role(Base):
     __tablename__ = 'roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(50), unique=True)
+    id = Column(Integer(), primary_key=True)
+    name = Column(String(50), unique=True)
 
 
-class UserRoles(db.Model):
+class UserRoles(Base):
     __tablename__ = 'user_roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
+    id = Column(Integer(), primary_key=True)
+    user_id = Column(Integer(), ForeignKey('users.id', ondelete='CASCADE'))
+    role_id = Column(Integer(), ForeignKey('roles.id', ondelete='CASCADE'))
