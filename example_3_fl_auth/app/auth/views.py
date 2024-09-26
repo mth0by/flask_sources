@@ -11,9 +11,9 @@ from flask import (
 from flask_login import current_user, login_user, logout_user, login_required
 from app import login_manager, db
 from app.auth.forms import LoginForm
-from app.auth.models import User
+from app.auth.models import User, UserRoles, Role
 
-from app.auth.backends.ldap import do_login, do_logout
+from app.auth.backends.ldap import do_login, do_logout, get_user_roles
 
 auth = Blueprint('auth', __name__)
 
@@ -28,36 +28,36 @@ def get_current_user():
     g.user = current_user
 
 
-@auth.route('/')
-@auth.route('/home')
-def home():
-    return render_template('home.html')
-
-
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        flash('You are already logged in.')
-        return redirect(url_for('auth.home'))
+        flash('Авторизация уже пройдена ранее.')
+        return redirect(url_for('common.home'))
     form = LoginForm(request.form)
     if request.method == 'POST' and form.validate():
         username = request.form['username']
         password = request.form['password']
 
         try:
-            do_login(username, password)
+            entry = do_login(username, password)
         except Exception as ex:
             flash(str(ex), 'danger')
             return render_template('login.html', form=form)
         user = User.query.filter_by(username=username).first()
         if not user:
             user = User(username=username, password=password)
-            db.session.add(user)
-            db.session.commit()
-            # db.commit()
+        else:
+            db.session.query(UserRoles).filter_by(user_id=user.id).delete()
+
+        user_roles = list(get_user_roles(entry))
+        roles = db.session.query(Role).filter(Role.name.in_(user_roles))
+        user.roles.extend(roles)
+        db.session.add(user)
+
+        db.session.commit()
         login_user(user)
-        flash('You have successfully logged in.', 'success')
-        return redirect(url_for('auth.home'))
+        flash('Авторизация успешна.', 'success')
+        return redirect(url_for('common.home'))
     if form.errors:
         flash(form.errors, 'danger')
 
@@ -68,4 +68,4 @@ def login():
 @login_required
 def logout():
     do_logout()
-    return redirect(url_for('auth.home'))
+    return redirect(url_for('common.home'))

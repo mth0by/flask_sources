@@ -25,6 +25,9 @@ with app.app_context():
     login_manager.login_view = 'auth.login'
 
     from app.auth.views import auth
+    from app.common.views import common
+
     app.register_blueprint(auth)
+    app.register_blueprint(common)
 
     db.create_all()
